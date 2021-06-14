@@ -65,14 +65,13 @@
     ).then(v => print(v.view));
 
     function print(view) {
-        // generate a PNG snapshot and then download the image
-        // view.toImageURL('png').then(function(url) {
-        //     var link = document.createElement('a');
-        //     link.setAttribute('href', url);
-        //     link.setAttribute('target', '_blank');
-        //     link.setAttribute('download', 'vega-export.png');
-        //     link.dispatchEvent(new MouseEvent('click'));
-        // }).catch(function(error) { /* error handling */ });
+        view.toImageURL('png').then(function(url) {
+            var link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('target', '_blank');
+            link.setAttribute('download', 'vega-export.png');
+            link.dispatchEvent(new MouseEvent('click'));
+        }).catch(function(error) { /* error handling */ });
     }
 
     function render(spec) {
