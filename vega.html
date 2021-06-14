@@ -1,0 +1,89 @@
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+<body>
+  <div id="view"></div>
+  <script type="text/javascript">
+    var view;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const api = urlParams.get('api');
+    const token = urlParams.get('token');
+
+
+    const spec = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v3.json",
+        "width": 600,
+        "height": 400,
+        "data": {
+            "url": `https://${api}.tinybird.co/v0/sql?q=%25%0AWITH%20finalized_datetime%20as%20utc_date%0ASELECT%20%0A%20%20toStartOfInterval(utc_date%2C%20interval%2010%20second)%20as%20x_date%2C%0A%20%20sum(line_amount%20*%20joinGet(stores_join_by_cod_store__v0%2C%20'exchange_rate'%2C%20cod_store))%20l_amount%0AFROM%20orders_stream__v0%0AWHERE%201%0Aand%20utc_date%20between%20now()%20-%20interval%2015%20minute%20and%20now()%0Agroup%20by%20x_date%0Aorder%20by%20x_date%20FORMAT%20CSVWithNames&token=${token}&pipeline=sales_anomalies_stream`,
+            "format": {
+                "type": "csv",
+                "parse": {
+                    "l_amount": "number"
+                }
+            }
+        },
+        "mark": {
+            "type": "line",
+            "interpolate": "monotone"
+        },
+        "encoding": {
+            "x": {
+            "field": "x_date",
+            "timeUnit": "utc"
+            }
+        },
+        "layer": [
+            {
+            "mark": {"type": "errorband", "extent": "iqr", "interpolate": "linear"},
+            "encoding": {
+                "y": {
+                "field": "l_amount",
+                "type": "quantitative",
+                "title": "sales €"
+                }
+            }
+            },
+            {
+            "mark": "line",
+            "encoding": {
+                "y": {
+                "aggregate": "mean",
+                "field": "l_amount"
+                }
+            }
+            }
+        ]
+    }
+
+    vegaEmbed(
+      '#view',
+      spec
+    ).then(v => print(v.view));
+
+    function print(view) {
+        // generate a PNG snapshot and then download the image
+        // view.toImageURL('png').then(function(url) {
+        //     var link = document.createElement('a');
+        //     link.setAttribute('href', url);
+        //     link.setAttribute('target', '_blank');
+        //     link.setAttribute('download', 'vega-export.png');
+        //     link.dispatchEvent(new MouseEvent('click'));
+        // }).catch(function(error) { /* error handling */ });
+    }
+
+    function render(spec) {
+      view = new vega.View(vega.parse(spec), {
+        renderer:  'canvas',  // renderer (canvas or svg)
+        container: '#view',   // parent DOM container
+        hover:     true       // enable hover processing
+      });
+      return view.runAsync();
+    }
+
+    // render(ss)
+  </script>
+</body>
