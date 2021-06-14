@@ -66,6 +66,7 @@
 
     function print(view) {
         view.toImageURL('png').then(function(url) {
+            console.log(url)
             var link = document.createElement('a');
             link.setAttribute('href', url);
             link.setAttribute('target', '_blank');
@@ -80,7 +81,7 @@
         container: '#view',   // parent DOM container
         hover:     true       // enable hover processing
       });
-      return view.runAsync();
+      return view.runSync();
     }
 
     // render(ss)
